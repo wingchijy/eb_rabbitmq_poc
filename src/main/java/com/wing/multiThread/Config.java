@@ -23,11 +23,13 @@ public class Config
 
     public static int PRODUCE_WORKER_COUNT;
     public static int CONSUME_WORKER_COUNT;
+
+    public static String CONSUME_MODE;
     public static int PRODUCE_TIMECOST_ONCE_COUNT;
     public static int CONSUME_TIMECOST_ONCE_COUNT;
     public static int CONSUME_QUEUE_ASSIGN_CYCLE;
     public static int CONSUME_SLEEP_SECONDS;
-
+    
     public static int MESSAGE_PER_SIZE;
     public static int SEND_TIMES;
     public static int SEND_MESSAGE_COUNT;
@@ -54,6 +56,8 @@ public class Config
 
         PRODUCE_WORKER_COUNT = config.getInt("PRODUCE_WORKER_COUNT");
         CONSUME_WORKER_COUNT = config.getInt("CONSUME_WORKER_COUNT");
+
+        CONSUME_MODE = config.getString("CONSUME_MODE");
         PRODUCE_TIMECOST_ONCE_COUNT = config.getInt("PRODUCE_TIMECOST_ONCE_COUNT");
         CONSUME_TIMECOST_ONCE_COUNT = config.getInt("CONSUME_TIMECOST_ONCE_COUNT");
         CONSUME_QUEUE_ASSIGN_CYCLE = config.getInt("CONSUME_QUEUE_ASSIGN_CYCLE");

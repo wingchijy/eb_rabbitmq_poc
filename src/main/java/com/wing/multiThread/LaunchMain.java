@@ -55,9 +55,9 @@ public class LaunchMain
         // create producers.
         ExecutorService produce = Executors.newCachedThreadPool();
 
-        for(int i=0; i< Config.PRODUCE_WORKER_COUNT; i++)
-            produce.execute( new ProduceWorker(i) );
-
+        for(int i=0; i< Config.PRODUCE_WORKER_COUNT; i++) {
+            produce.execute(new ProduceWorker(i));
+        }
         produce.shutdown();
     }
 
@@ -66,10 +66,14 @@ public class LaunchMain
         // create consumers.
         ExecutorService consumer = Executors.newCachedThreadPool();
 
-        for (int i = 0; i < Config.CONSUME_WORKER_COUNT; i++)
-//            consumer.execute(new ConsumeBlockingWorker(i));
-            consumer.execute(new ConsumePollingWorker(i));
-
+        for (int i = 0; i < Config.CONSUME_WORKER_COUNT; i++) {
+            if("Blocking".equalsIgnoreCase(Config.CONSUME_MODE) ) {
+                consumer.execute(new ConsumeBlockingWorker(i));
+            }
+            else if("Polling".equalsIgnoreCase(Config.CONSUME_MODE) ) {
+                consumer.execute(new ConsumePollingWorker(i));
+            }
+        }
         consumer.shutdown();
     }
 }
