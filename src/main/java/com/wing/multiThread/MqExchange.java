@@ -5,15 +5,14 @@ import com.rabbitmq.client.AMQP;
 
 public class MqExchange
 {
-    private String exchangeName=null;
-    private int exchangeNo=0;
-    private AMQP.Exchange.DeclareOk exchange=null;
+    private String exchangeName;
+    private int exchangeNo;
+    private AMQP.Exchange.DeclareOk exchange;
 
 
     public void setExchange(AMQP.Exchange.DeclareOk exchange) {
         this.exchange = exchange;
     }
-
 
     public String getExchangeName() {
         return exchangeName;

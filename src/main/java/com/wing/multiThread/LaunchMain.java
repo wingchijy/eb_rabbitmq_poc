@@ -28,18 +28,19 @@ public class LaunchMain
             // load config items.
             conf.load(configFile);
 
-            // create mq components.
+            // create mq instances.
             MqInstance mq = new MqInstance();
-            mq.createAllQueues(Config.MQ_QUEUE_COUNT, Config.MQ_QUEUE_NAME_PREFIX);
-            mq.createAllExchanges(Config.MQ_EXCHANGE_COUNT, Config.MQ_EXCHANGE_NAME_PREFIX);
+            mq.createPublicResource();
 
             // multi-thread work.
             if ( workerRole == null ) {
                 startProduce();
                 startConsume();
-            } else if ("produce".equals(workerRole)) {
+            }
+            else if ("produce".equals(workerRole)) {
                 startProduce();
-            } else if ("consume".equals(workerRole)) {
+            }
+            else if ("consume".equals(workerRole)) {
                 startConsume();
             }
         }
@@ -51,10 +52,10 @@ public class LaunchMain
 
     public static void startProduce() throws Exception
     {
-        // create producer.
+        // create producers.
         ExecutorService produce = Executors.newCachedThreadPool();
 
-        for(int i=0; i< Config.WORKER_PRODUCE_COUNT; i++)
+        for(int i=0; i< Config.PRODUCE_WORKER_COUNT; i++)
             produce.execute( new ProduceWorker(i) );
 
         produce.shutdown();
@@ -65,8 +66,9 @@ public class LaunchMain
         // create consumers.
         ExecutorService consumer = Executors.newCachedThreadPool();
 
-        for (int i = 0; i < Config.WORKER_CONSUME_COUNT; i++)
-            consumer.execute(new ConsumeWorker(i));
+        for (int i = 0; i < Config.CONSUME_WORKER_COUNT; i++)
+//            consumer.execute(new ConsumeBlockingWorker(i));
+            consumer.execute(new ConsumePollingWorker(i));
 
         consumer.shutdown();
     }

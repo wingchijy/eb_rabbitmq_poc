@@ -22,26 +22,40 @@ public class MqGlobal
     }
 
 
-    public MqQueue createQueue(Channel channel, String name, int no) throws Exception
+    // queues.
+    public void createAllQueues(Channel channel, int count, String prefix) throws Exception
     {
-        if( queues.get(no) != null ){
-            return queues.get(no);
-        }
-        else
+        for(int i=0; i<count; i++)
         {
-            MqQueue q = new MqQueue();
-            q.setQueueName(name);
-            q.setQueueNo(no);
-
-            Map<String, Object> args = new HashMap<String, Object>();
-            args.put("x-ha-policy", "all");
-            q.setQueue(
-                    channel.queueDeclare(name, Config.MQ_DURABLE, false, false, args) );
-
-            queues.put(no, q);
-            return q;
+            String name = String.format("%s%d", prefix, i);
+            createQueue(channel, name, i);
         }
     }
+
+    public void createQueue(Channel channel, String name, int no) throws Exception
+    {
+        if( queues.get(no) != null ){
+            return ;
+        }
+
+        MqQueue q = new MqQueue();
+        q.setQueueName(name);
+        q.setQueueNo(no);
+        q.setQueue( this.setQueue(channel, name) );
+
+        queues.put(no, q);
+    }
+
+
+    public AMQP.Queue.DeclareOk setQueue(Channel channel, String name) throws Exception
+    {
+        Map<String, Object> args = null;
+//        args = new HashMap<String, Object>();
+//        args.put("x-ha-policy", "all");
+
+        return channel.queueDeclare(name, Config.MQ_DURABLE, false, false, args) ;
+    }
+
 
     public MqQueue getQueueByNo(int no)
     {
@@ -49,6 +63,15 @@ public class MqGlobal
     }
 
 
+    // exchanges
+    public void createAllExchanges(Channel channel, int count, String prefix) throws Exception
+    {
+        for(int i=0; i<count; i++)
+        {
+            String name = String.format("%s%d", prefix, i);
+            createExchange(channel, name, i);
+        }
+    }
 
     public MqExchange createExchange(Channel channel, String name, int no) throws Exception
     {
@@ -58,21 +81,24 @@ public class MqGlobal
         else
         {
             MqExchange ex = new MqExchange();
-
-            ex.setExchange(
-                    channel.exchangeDeclare(name, Config.MQ_EXCHANGE_TYPE, true));
             ex.setExchangeName(name);
             ex.setExchangeNo(no);
+            ex.setExchange( this.setExchange(channel,name) );
 
             exchanges.put(no, ex);
 
-            // exchange bind to queues.
-            this.exchangeBindAllQueues(channel, no, Config.MQ_ROUTE_KEY_PREFIX);
+            // exchange bind queues.
+            exchangeBindAllQueues(channel, no, Config.MQ_ROUTE_KEY_PREFIX);
 
             return ex;
         }
-
     }
+
+    public AMQP.Exchange.DeclareOk setExchange(Channel channel, String name) throws Exception
+    {
+        return channel.exchangeDeclare(name, Config.MQ_EXCHANGE_TYPE, true);
+    }
+
 
     public void exchangeBindAllQueues(Channel channel, int exchangeNo, String routePrefix) throws Exception
     {
@@ -97,6 +123,7 @@ public class MqGlobal
     }
 
 
+
     public static Map<Integer, MqQueue> getQueues() {
         return queues;
     }
@@ -112,6 +139,7 @@ public class MqGlobal
     public static void setExchanges(Map<Integer, MqExchange> exchanges) {
         MqGlobal.exchanges = exchanges;
     }
+
 }
 
 

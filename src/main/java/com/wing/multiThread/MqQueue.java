@@ -5,17 +5,17 @@ import com.rabbitmq.client.AMQP;
 
 public class MqQueue
 {
-    private String queueName=null;
-    private int queueNo=0;
-    private AMQP.Queue.DeclareOk queue=null;
+    private String queueName;
+    private int queueNo;
+    private AMQP.Queue.DeclareOk queue;
 
-
-    public void setQueue(AMQP.Queue.DeclareOk queue) {
-        this.queue = queue;
-    }
 
     public int messageCount(){
         return queue.getMessageCount();
+    }
+
+    public void setQueue(AMQP.Queue.DeclareOk queue) {
+        this.queue = queue;
     }
 
     public String getQueueName() {

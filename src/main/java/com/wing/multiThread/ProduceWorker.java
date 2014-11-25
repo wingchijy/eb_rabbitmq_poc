@@ -1,17 +1,16 @@
 package com.wing.multiThread;
 
 
-public class ProduceWorker implements Runnable
+public class ProduceWorker extends WorkerFactory
 {
-    private String threadName;
     private int exchangeNo;
-    protected MqInstance mqInst;
 
 
-    public ProduceWorker(int seqNo)
+    public ProduceWorker(int no)
     {
-        this.threadName = String.format("t-producer-%d", seqNo);
-        this.exchangeNo = seqNo % Config.MQ_EXCHANGE_COUNT;
+        seqNo = no;
+        threadName = String.format("t-producer-%d", no);
+        exchangeNo = no % Config.MQ_EXCHANGE_COUNT;
     }
 
 
@@ -26,8 +25,9 @@ public class ProduceWorker implements Runnable
 
             for(int i=0; i< Config.SEND_TIMES; i++)
             {
-                doWork(msg);
-                Thread.sleep( Config.SEND_ONETIME_INTERVAL_SECONDS * 1000 );
+                process(msg);
+
+                Thread.sleep( Config.SEND_INTERVAL_SECONDS * 1000 );
             }
         }
         catch (Exception e) {
@@ -36,48 +36,34 @@ public class ProduceWorker implements Runnable
     }
 
 
-    public void doWork(byte[] message)
+    public void process(byte[] message)
     {
-        long startTime = System.currentTimeMillis();
-        int count=0;
+        setStartTime();
 
-        for(int i=0; i< Config.SEND_ONETIME_MESSAGE_COUNT; i++)
+        for(int i=0; i< Config.SEND_MESSAGE_COUNT; i++)
         {
             String key = String.format("%s%d.%d-%d",
                     Config.MQ_ROUTE_KEY_PREFIX,
                     (i % Config.MQ_QUEUE_COUNT),
-                    this.exchangeNo, i);
-            try
-            {
-                mqInst.publishOneMessage(this.exchangeNo, key, message);
+                    exchangeNo, i);
+            try{
+                mqInst.publishMessage(exchangeNo, key, message);
+
+                logger.debug( String.format("producer: %s | exNo=%d | msgNo=%d | key=%s | %d",
+                        threadName, exchangeNo, i, key, message.length ));
             }
             catch (Exception e) {
                 e.printStackTrace();
+                return;
             }
-//            System.out.println(
-//                    String.format("producer: %s | exNo=%d | msgNo=%d | key=%s | %d",
-//                    this.threadName, this.exchangeNo, i, key, message.length ));
 
-            // compute time-cost.
-            count++;
-            if (count == Config.TIMECOST_ONETIME_DEAL_COUNT)
-            {
-                long endTime = System.currentTimeMillis();
-                System.out.println( String.format("Producer: %s | %d | %d ",
-                        this.threadName, (endTime-startTime), Config.TIMECOST_ONETIME_DEAL_COUNT) );
-
-                startTime = System.currentTimeMillis();
-                count=0;
-            }
+            msgCount++;
+            if (msgCount == Config.PRODUCE_TIMECOST_ONCE_COUNT)
+                printCostTime();
         }
 
-        // compute time-cost.
-        if(count > 0)
-        {
-            long endTime = System.currentTimeMillis();
-            System.out.println( String.format("Producer: %s | %d | %d ",
-                    this.threadName, (endTime-startTime), count) );
-        }
+        if(msgCount > 0 )
+            printCostTime();
     }
 
 }
