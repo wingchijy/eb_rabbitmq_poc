@@ -17,8 +17,8 @@ public abstract class WorkerFactory implements Runnable
     public void process(){}
 
 
-    protected static long startTime;
-    protected static int msgCount;
+    protected long startTime;
+    protected int msgCount;
 
     public void setStartTime()
     {

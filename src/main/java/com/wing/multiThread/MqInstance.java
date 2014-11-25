@@ -96,7 +96,8 @@ public class MqInstance
     {
         this.consumer = new QueueingConsumer( this.channel );
 
-        this.channel.basicConsume(queueName, Config.MQ_CONSUME_ACK, consumer);
+        this.channel.basicConsume(
+                queueName, Config.MQ_CONSUME_ACK, consumer);
 
         this.channel.basicQos(1);
     }

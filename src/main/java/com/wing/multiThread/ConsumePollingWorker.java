@@ -44,10 +44,17 @@ public class ConsumePollingWorker extends WorkerFactory
         {
             mqInst = new MqInstance();
 
+            setStartTime();
+
             while(true)
             {
+                // no data, sleep.
                 if( getMessageCountInQueues() == 0 )
+                {
+                    logger.debug( String.format("SeqNo=(%d) no data in queues. Sleep(%d) seconds.",
+                                    seqNo, Config.CONSUME_SLEEP_SECONDS) );
                     Thread.sleep(Config.CONSUME_SLEEP_SECONDS * 1000);
+                }
 
                 // consume messages.
                 for(Integer queueNo: queueList)
@@ -67,8 +74,6 @@ public class ConsumePollingWorker extends WorkerFactory
 
     public void process(Integer queueNo, String queueName)
     {
-        setStartTime();
-
         while (true)
         {
             try{
@@ -101,9 +106,6 @@ public class ConsumePollingWorker extends WorkerFactory
         for(Integer queueNo: queueList){
             count += MqGlobal.getInstance().getQueueByNo(queueNo).messageCount();
         }
-
-        if ( count > 0 )
-            System.out.println("----" +seqNo +"----" +count);
 
         return count;
     }
